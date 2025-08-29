@@ -20,9 +20,11 @@ builder.Services.AddCors(options =>
 });
 
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
+var connection =
+    $"{builder.Configuration.GetConnectionString("DefaultConnection")}Pwd={Environment.GetEnvironmentVariable("db_pwd")}";
 builder.Services.AddDbContext<ProductsController.ProductContext>(
     dbContextOptions => dbContextOptions
-        .UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), serverVersion)
+        .UseMySql(connection, serverVersion)
         .LogTo(Console.WriteLine, LogLevel.Information)
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());

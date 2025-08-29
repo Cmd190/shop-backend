@@ -1,12 +1,29 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 
-namespace WebApp1.Controllers;
+namespace Webshop;
 
-public partial class ProductsController
+public class Category
 {
+    public int  Id { get; set; }
+
+    public string Name { get; set; }
+}
+
+public class ProductOption
+{
+    public int  Id { get; set; }
+
+    [Column("OptionValue")]
+    public string Option { get; set; }
+}
+
     public class Product
     {
         public int Id { get; set; }
+
+        [Column("product_id")]
+        public int ProductId { get; set; }
 
         [Column("ProductName")]
         public string Name { get; set; } = "";
@@ -14,7 +31,22 @@ public partial class ProductsController
         [Column("ProductDescription")]
         public string Description { get; set; } = "";
         public double Price { get; set; }
-        public string Category { get; set; } = "";
+
+        [Column("discount_percent")]
+
+        public double DiscountPercent { get; set; }
+        public int Category { get; set; }
+
+        public string Manufacturer { get; set; }
+
+        [Column("ship_duration")]
+        public int ShipDuration { get; set; }
+
+        [Column("stock_count")]
+        public int StockCount { get; set; }
+
+        [Column("product_option")]
+        public int? Option { get; set; }
 
         public static Product Default()
         {
@@ -24,8 +56,7 @@ public partial class ProductsController
                 Name = "Default",
                 Description = "",
                 Price = 0.0,
-                Category = "None"
+                Category = -1
             };
         }
     }
-}
