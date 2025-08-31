@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Webshop;
 
+[Table("productcategory")]
 public class Category
 {
     public int  Id { get; set; }
