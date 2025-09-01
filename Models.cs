@@ -9,6 +9,8 @@ public class Category
     public int  Id { get; set; }
 
     public string Name { get; set; }
+
+    public List<Product> Products { get; } = [];
 }
 
 public class ProductOption
@@ -36,7 +38,6 @@ public class ProductOption
         [Column("discount_percent")]
 
         public double DiscountPercent { get; set; }
-        public int Category { get; set; }
 
         public string Manufacturer { get; set; }
 
@@ -49,6 +50,8 @@ public class ProductOption
         [Column("product_option")]
         public int? Option { get; set; }
 
+        public List<Category> Categories { get; } = [];
+
         public static Product Default()
         {
             return new Product
@@ -57,7 +60,6 @@ public class ProductOption
                 Name = "Default",
                 Description = "",
                 Price = 0.0,
-                Category = -1
             };
         }
     }

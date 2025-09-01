@@ -22,11 +22,8 @@ public partial class ProductsController : ControllerBase
     [HttpGet("{categoryName}")]
     public async Task<ActionResult<IEnumerable<Product>>>  GetAllProducts(string categoryName)
     {
-        var category = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Name == categoryName);
-        return category == null ? NotFound()
-            :await _context.Product
-            .Where(p => p.Id == category.Id)
+        return await _context.Product
+            .Where(p => p.Categories.Any(c => c.Name.Equals(categoryName.Trim().ToLowerInvariant())))
             .ToListAsync();
     }
 
