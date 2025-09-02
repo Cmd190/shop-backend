@@ -2,10 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Webshop;
 
-namespace WebApp1.Controllers;
+namespace Webshop;
 
-public partial class ProductsController
-{
+
     public class ProductContext : DbContext
     {
         public ProductContext(DbContextOptions<ProductContext> options) : base(options)
@@ -13,8 +12,14 @@ public partial class ProductsController
 
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Product>().HasMany(p => p.Category).WithMany(e => e.Product)
+                .UsingEntity("product_productcategory");
+        }
+
         public DbSet<Product> Product { get; set; }
 
         public DbSet<Category> Categories { get; set; }
     }
-}

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using WebApp1.Controllers;
+using Webshop;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
 var connection =
     $"{builder.Configuration.GetConnectionString("DefaultConnection")}Pwd={Environment.GetEnvironmentVariable("db_pwd")}";
-builder.Services.AddDbContext<ProductsController.ProductContext>(
+builder.Services.AddDbContext<ProductContext>(
     dbContextOptions => dbContextOptions
         .UseMySql(connection, serverVersion)
         .LogTo(Console.WriteLine, LogLevel.Information)
@@ -68,7 +68,10 @@ app.MapGet("/weatherforecast", () =>
     .WithName("GetWeatherForecast");
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+namespace Webshop
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+    {
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
 }

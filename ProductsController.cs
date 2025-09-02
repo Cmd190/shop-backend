@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Webshop;
 
-namespace WebApp1.Controllers;
+namespace Webshop;
 
 [ApiController]
 [Route("[controller]")]
@@ -23,8 +22,10 @@ public partial class ProductsController : ControllerBase
     public async Task<ActionResult<IEnumerable<Product>>>  GetAllProducts(string categoryName)
     {
         return await _context.Product
-            .Where(p => p.Categories.Any(c => c.Name.Equals(categoryName.Trim().ToLowerInvariant())))
+            .Where(p => p.Category.Any(c => c.Name.Equals(categoryName.Trim().ToLowerInvariant())))
             .ToListAsync();
+
+        // return await _context.Product.Take(3).ToListAsync();
     }
 
     [HttpGet("{id:int}")]
