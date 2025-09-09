@@ -20,11 +20,27 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
 
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<Product>> GetProduct(int id)
+
+    // [HttpGet("{id:int}")]
+    [HttpGet]
+    public async Task<ActionResult<Product>> GetProduct(int? id, string? name)
     {
-        var product = await context.Product.FindAsync(id);
-        return product == null ? NotFound() : product;
+        if (id is > 0)
+        {
+            var product = await context.Product.FindAsync(id);
+            return product == null ? NotFound() : product;
+        }
+
+        if(!string.IsNullOrWhiteSpace(name))
+        {
+            var product = await context.Product
+                .Where(p => p.ProductLink.Equals(name.Trim().ToLowerInvariant())).FirstOrDefaultAsync();
+            return product == null ? NotFound() : product;
+
+        }
+
+        return BadRequest();
+
     }
 
 }

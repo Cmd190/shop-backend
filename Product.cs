@@ -23,6 +23,9 @@ public class Product
 
     [Column("product_option")] public int? Option { get; set; }
 
+    [Column("product_link")]
+    public string ProductLink { get; set; }
+
     public List<Category> Category { get; set; } = [];
 
     public static Product Default()
