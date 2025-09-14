@@ -12,10 +12,13 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     private readonly ILogger<ProductsController> _logger = logger;
 
     [HttpGet("{categoryName}")]
-    public async Task<ActionResult<IEnumerable<Product>>>  GetAllProducts(string categoryName)
+    public async Task<ActionResult<IEnumerable<ProductDto>>>  GetAllProducts(string categoryName)
     {
         return await context.Product
-            .Where(p => p.Category.Any(c => c.Name.Equals(categoryName.Trim().ToLowerInvariant())))
+            .Include(p => p.Category)
+            .Where(p => p.Category.Any(c
+                => EF.Functions.Like(c.Name.ToLower(), categoryName.Trim().ToLowerInvariant())))
+            .Select(p => p.ToProductDto())
             .ToListAsync();
 
     }
@@ -23,19 +26,24 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
 
     // [HttpGet("{id:int}")]
     [HttpGet]
-    public async Task<ActionResult<Product>> GetProduct(int? id, string? name)
+    public async Task<ActionResult<ProductDto>> GetProduct(int? id, string? name)
     {
         if (id is > 0)
         {
-            var product = await context.Product.FindAsync(id);
-            return product == null ? NotFound() : product;
+            var product = await context.Product
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            return product == null ? NotFound() : product.ToProductDto();
         }
 
         if(!string.IsNullOrWhiteSpace(name))
         {
             var product = await context.Product
+                .Include(p => p.Category)
                 .Where(p => p.ProductLink.Equals(name.Trim().ToLowerInvariant())).FirstOrDefaultAsync();
-            return product == null ? NotFound() : product;
+
+            return product == null ? NotFound() : product.ToProductDto();
 
         }
 

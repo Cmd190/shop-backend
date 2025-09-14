@@ -20,3 +20,4 @@ public class ProductOption
     [Column("OptionValue")]
     public string Option { get; set; }
 }
+

@@ -2,6 +2,24 @@
 
 namespace Webshop;
 
+
+
+
+public class ProductDto
+{
+    public int Id { get; set; }
+    public int ProductId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public double Price { get; set; }
+    public double DiscountPercent { get; set; }
+    public string Manufacturer { get; set; } = string.Empty;
+    public int ShipDuration { get; set; }
+    public int StockCount { get; set; }
+    public string ProductLink { get; set; } = string.Empty;
+    public IEnumerable<string> Categories { get; set; } = [];
+}
+
 public class Product
 {
     public int Id { get; set; }
@@ -27,6 +45,24 @@ public class Product
     public string ProductLink { get; set; }
 
     public List<Category> Category { get; set; } = [];
+
+    public ProductDto ToProductDto()
+    {
+        return new ProductDto
+        {
+            Id = Id,
+            Name = Name,
+            ProductId = ProductId,
+            Description = Description,
+            Categories = Category.Select(c => c.Name),
+            Price = Price,
+            DiscountPercent = DiscountPercent,
+            ShipDuration = ShipDuration,
+            ProductLink = ProductLink,
+            Manufacturer = Manufacturer,
+            StockCount = StockCount
+        };
+    }
 
     public static Product Default()
     {
