@@ -1,3 +1,5 @@
+using System.Net.Mime;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Webshop;
 
@@ -29,15 +31,48 @@ builder.Services.AddDbContext<ProductContext>(
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());
 
+builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseDeveloperExceptionPage();
     app.UseSwaggerUi(options =>
     {
         options.DocumentPath = "/openapi/v1.json";
+    });
+}
+
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler(exceptionHandlerApp =>
+    {
+        exceptionHandlerApp.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            // using static System.Net.Mime.MediaTypeNames;
+            context.Response.ContentType = MediaTypeNames.Text.Plain;
+
+            await context.Response.WriteAsync("An exception was thrown.");
+
+            var exceptionHandlerPathFeature =
+                context.Features.Get<IExceptionHandlerPathFeature>();
+
+            if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
+            {
+                await context.Response.WriteAsync(" The file was not found.");
+            }
+
+            if (exceptionHandlerPathFeature?.Path == "/")
+            {
+                await context.Response.WriteAsync(" Page: Home.");
+            }
+        });
     });
 }
 
@@ -47,31 +82,5 @@ app.UseCors(MyAllowSpecificOrigins);
 
 
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 app.MapControllers();
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
 app.Run();
-
-namespace Webshop
-{
-    record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-    {
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
-}

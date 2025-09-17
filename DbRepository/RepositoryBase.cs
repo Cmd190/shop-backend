@@ -16,7 +16,7 @@ public interface IRepositoryBase<T>
 
 
 
-internal interface IRepositoryWrapper
+public interface IRepositoryWrapper
 {
     IProductRepository Product { get; }
     ICategoryRepository Category { get; }

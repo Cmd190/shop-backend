@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Webshop;
 
-[ApiController]
-[Route("[controller]")]
-public class ProductsController(ILogger<ProductsController> logger, ProductContext context) : ControllerBase
-{
-    // TODD https://www.entityframeworktutorial.net/efcore/querying-in-ef-core.aspx
-    // https://code-maze.com/searching-aspnet-core-webapi/
 
-    private readonly ILogger<ProductsController> _logger = logger;
+[ApiController]
+[Route("v1/[controller]")]
+public class V1ProductsController(ILogger<V1ProductsController> logger, ProductContext context) : ControllerBase
+{
+
+
+    private readonly ILogger<V1ProductsController> _logger = logger;
 
     [HttpGet("{categoryName}")]
     public async Task<ActionResult<IEnumerable<ProductDto>>>  GetAllProducts(string categoryName)
