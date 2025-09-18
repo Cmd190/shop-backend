@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Webshop.Controllers;
 
 namespace Webshop;
 
 public interface IProductRepository : IRepositoryBase<Product>
 {
-    Task<IEnumerable<Product>> GetAllProductsAsync();
+    Task<PagedList<Product>> GetAllProductsAsync(ProductQueryParams queryParams);
 
     Task<IEnumerable<Product>> GetProductsByCategoryAsync(string categoryName);
 
@@ -16,7 +17,6 @@ public interface IProductRepository : IRepositoryBase<Product>
 internal class ProductRepository(ProductContext context) : RepositoryBase<Product>(context), IProductRepository
 {
     private readonly ProductContext _context = context;
-    public async Task<IEnumerable<Product>> GetAllProductsAsync() => await FindAll().ToListAsync();
 
     public async Task<Product?> GetProductByIdAsync(int id) =>
         await FindByCondition(p => p.Id == id )
@@ -28,6 +28,10 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
                 => EF.Functions.Like(p.Name.ToLower(), name.Trim().ToLowerInvariant()))
             .Include(p => p.Category)
             .FirstOrDefaultAsync();
+
+    public async Task<PagedList<Product>> GetAllProductsAsync(ProductQueryParams queryParams) =>
+        await FindAll().OrderBy(p => p.Name)
+            .ToPagedListAsync(queryParams.PageNumber, queryParams.PageSize);
 
     public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(string categoryName) =>
         await _context.Product

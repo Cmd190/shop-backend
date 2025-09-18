@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Webshop.Controllers;
 
@@ -6,15 +7,29 @@ namespace Webshop.Controllers;
 [Route("[controller]")]
 public class ProductsController(ILogger<ProductsController> logger, ProductContext context, IRepositoryWrapper repo) : ControllerBase
 {
+    // TODO Result Validation
     // TODD https://www.entityframeworktutorial.net/efcore/querying-in-ef-core.aspx
     // https://code-maze.com/searching-aspnet-core-webapi/
 
 
     [HttpGet("all")]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts()
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts([FromQuery] ProductQueryParams queryParams)
     {
 
-            var products = await repo.Product.GetAllProductsAsync();
+            var products = await repo.Product.GetAllProductsAsync(queryParams);
+            var metadata = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasNextPage,
+                products.HasPreviousPage
+            };
+
+            Response.Headers.Append("Pagination", JsonConvert.SerializeObject(metadata));
+
+            logger.LogInformation("Returned {ProductsTotalCount} products from database.", products.TotalCount);
             return Ok(products.Select(p => p.ToProductDto()));
     }
 
@@ -47,3 +62,4 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     }
     
 }
+
