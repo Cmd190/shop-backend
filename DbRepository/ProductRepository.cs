@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Webshop.Controllers;
 
 namespace Webshop;
@@ -29,15 +30,44 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
             .Include(p => p.Category)
             .FirstOrDefaultAsync();
 
-    public async Task<PagedList<Product>> GetAllProductsAsync(ProductQueryParams queryParams) =>
-        await FindAll().OrderBy(p => p.Name)
-            .ToPagedListAsync(queryParams.PageNumber, queryParams.PageSize);
+    public async Task<PagedList<Product>> GetAllProductsAsync(ProductQueryParams queryParams)
+    {
+        return await _context.Product
+            .Include(p => p.Category)
+            .Where(p =>
+                p.Price > queryParams.MinPrice
+                && p.Price < queryParams.MaxPrice
+                // check manufacturer
+                && (string.IsNullOrWhiteSpace(queryParams.Manufacturer)
+                    ||  EF.Functions.Like(
+                        p.Manufacturer.ToLower(),
+                        queryParams.Manufacturer.Trim().ToLowerInvariant()
+                    )
+                )
+                // check category
+                && (string.IsNullOrWhiteSpace(queryParams.Category)
+                    || p.Category.Any(c
+                        => EF.Functions.Like(c.Name.ToLower(),
+                            queryParams.Category.Trim().ToLowerInvariant()))
+                )
+                // check name
+                // TODO implements startsWith
+                && (string.IsNullOrWhiteSpace(queryParams.ProductName)
+                    || EF.Functions.Like(p.Name.ToLower(),
+                            queryParams.ProductName.Trim().ToLowerInvariant())
+                )
+            )
 
-    public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(string categoryName) =>
-        await _context.Product
+            .OrderBy(p => p.Name)
+            .ToPagedListAsync(queryParams.PageNumber, queryParams.PageSize);
+    }
+
+    public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(string categoryName)
+    {
+        return await _context.Product
             .Include(p => p.Category)
             .Where(p => p.Category.Any(c
                 => EF.Functions.Like(c.Name.ToLower(), categoryName.Trim().ToLowerInvariant())))
             .ToListAsync();
-
+    }
 }

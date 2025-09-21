@@ -7,14 +7,26 @@ using System.Collections.Generic;
 
 public class ProductQueryParams
 {
+    private int _pageSize;
     private const int MaxPageSize = 50;
+    private const double MaxProductPrice = 1000.00;
     public int PageNumber { get; set; } = 1;
 
     public int PageSize
     {
-        get;
-        set => field = value > MaxPageSize ? MaxPageSize : value;
+        get => _pageSize;
+        set => _pageSize = value > MaxPageSize ? MaxPageSize : value;
     }
+
+    public double MinPrice { get; set; } = 0.00;
+
+    public double MaxPrice { get; set; } = MaxProductPrice;
+
+    public string? Manufacturer { get; set; }
+
+    public string? Category { get; set; }
+
+    public string? ProductName { get; set; }
 }
 
 public class PagedList<T> : List<T>
@@ -22,11 +34,11 @@ public class PagedList<T> : List<T>
     public int CurrentPage { get; private set; }
     public int TotalPages { get; private set; }
     public int PageSize { get; private set; }
-    public int TotalCount { get; set; }
+    public int ResultCount { get; set; }
 
     public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
     {
-        TotalCount = count;
+        ResultCount = count;
         PageSize = pageSize;
         CurrentPage = pageNumber;
         TotalPages = (int)Math.Ceiling(count / (double)pageSize);
@@ -43,7 +55,7 @@ public static class Extensions
     public static PagedList<T> ToPagedList<T>(this IQueryable<T> list, int pageNumber, int pageSize)
     {
         var items = list.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
-        return new PagedList<T>(list, list.Count(), pageNumber, pageSize);
+        return new PagedList<T>(items, list.Count(), pageNumber, pageSize);
     }
 
     public static async Task<PagedList<T>> ToPagedListAsync<T>(this IQueryable<T> source, int pageNumber, int pageSize)

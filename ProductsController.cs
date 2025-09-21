@@ -15,24 +15,39 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts([FromQuery] ProductQueryParams queryParams)
     {
+        if (!ValidateFilterParams(queryParams))
+        {
+            return BadRequest("Incorrect Filter Settings");
+        }
 
-            var products = await repo.Product.GetAllProductsAsync(queryParams);
-            var metadata = new
-            {
-                products.TotalCount,
-                products.PageSize,
-                products.CurrentPage,
-                products.TotalPages,
-                products.HasNextPage,
-                products.HasPreviousPage
-            };
+        var products = await repo.Product.GetAllProductsAsync(queryParams);
+        var metadata = new
+        {
+            products.ResultCount,
+            products.PageSize,
+            products.CurrentPage,
+            products.TotalPages,
+            products.HasNextPage,
+            products.HasPreviousPage
+        };
 
-            Response.Headers.Append("Pagination", JsonConvert.SerializeObject(metadata));
+        Response.Headers.Append("Pagination", JsonConvert.SerializeObject(metadata));
 
-            logger.LogInformation("Returned {ProductsTotalCount} products from database.", products.TotalCount);
-            return Ok(products.Select(p => p.ToProductDto()));
+        logger.LogInformation("Returned {ProductsTotalCount} products from database.", products.ResultCount);
+        return Ok(products.Select(p => p.ToProductDto()));
     }
 
+    private static bool ValidateFilterParams(ProductQueryParams queryParams)
+    {
+        return queryParams.MinPrice > 0
+               && queryParams.MinPrice < queryParams.MaxPrice
+               && ValidateManufacturer(queryParams.Manufacturer)
+               && ValidateCategory(queryParams.Category);
+    }
+
+    private static bool ValidateCategory(string? category) => category == null || category.Length is > 4 and < 100;
+
+    private static bool ValidateManufacturer(string? manufacturer) => manufacturer == null || manufacturer.Length is > 4 and < 100;
 
 
     [HttpGet("{categoryName}")]

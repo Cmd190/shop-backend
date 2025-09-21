@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Webshop;
 
@@ -26,14 +27,17 @@ public class Product
 
     [Column("product_id")] public int ProductId { get; set; }
 
-    [Column("ProductName")] public string Name { get; set; } = "";
+    [Column("ProductName")]
+    [MaxLength(200)]
+    public string Name { get; set; } = "";
 
     [Column("ProductDescription")] public string Description { get; set; } = "";
     public double Price { get; set; }
 
     [Column("discount_percent")] public double DiscountPercent { get; set; }
 
-    public string Manufacturer { get; set; }
+    [MaxLength(200)]
+    public required string Manufacturer { get; set; }
 
     [Column("ship_duration")] public int ShipDuration { get; set; }
 
@@ -42,7 +46,8 @@ public class Product
     [Column("product_option")] public int? Option { get; set; }
 
     [Column("product_link")]
-    public string ProductLink { get; set; }
+    [MaxLength(200)]
+    public required string ProductLink { get; set; }
 
     public List<Category> Category { get; set; } = [];
 
@@ -70,8 +75,10 @@ public class Product
         {
             Id = -1,
             Name = "Default",
-            Description = "",
+            Description = string.Empty,
             Price = 0.0,
+            Manufacturer = string.Empty,
+            ProductLink = string.Empty,
         };
     }
 }
