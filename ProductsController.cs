@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace Webshop.Controllers;
+namespace Webshop;
 
 [ApiController]
 [Route("[controller]")]
@@ -40,14 +40,15 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     private static bool ValidateFilterParams(ProductQueryParams queryParams)
     {
         return queryParams.MinPrice > 0
-               && queryParams.MinPrice < queryParams.MaxPrice
-               && ValidateManufacturer(queryParams.Manufacturer)
-               && ValidateCategory(queryParams.Category);
+                     && queryParams.MinPrice < queryParams.MaxPrice
+                     && ValidateManufacturer(queryParams.Manufacturer)
+                     && ValidateCategory(queryParams.Category);
     }
 
     private static bool ValidateCategory(string? category) => category == null || category.Length is > 4 and < 100;
 
-    private static bool ValidateManufacturer(string? manufacturer) => manufacturer == null || manufacturer.Length is > 4 and < 100;
+    private static bool ValidateManufacturer(string? manufacturer)
+        => manufacturer == null || manufacturer.Length is > 4 and < 100;
 
 
     [HttpGet("{categoryName}")]

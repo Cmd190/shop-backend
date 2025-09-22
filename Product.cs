@@ -31,7 +31,7 @@ public class Product
     [MaxLength(200)]
     public string Name { get; set; } = "";
 
-    [Column("ProductDescription")] public string Description { get; set; } = "";
+    [Column("ProductDescription")] public string Description { get; set; } = string.Empty;
     public double Price { get; set; }
 
     [Column("discount_percent")] public double DiscountPercent { get; set; }
@@ -49,7 +49,7 @@ public class Product
     [MaxLength(200)]
     public required string ProductLink { get; set; }
 
-    public List<Category> Category { get; set; } = [];
+    public required List<Category> Category { get; set; } = [];
 
     public ProductDto ToProductDto()
     {
@@ -71,6 +71,12 @@ public class Product
 
     public static Product Default()
     {
+        var dummyCategory = new Category
+        {
+            Id = -1,
+            Name = "None",
+            Product = [Default()]
+        };
         return new Product
         {
             Id = -1,
@@ -79,6 +85,7 @@ public class Product
             Price = 0.0,
             Manufacturer = string.Empty,
             ProductLink = string.Empty,
+            Category = [dummyCategory],
         };
     }
 }
