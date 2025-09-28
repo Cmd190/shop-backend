@@ -75,7 +75,7 @@ public class Product
         {
             Id = -1,
             Name = "None",
-            Product = [Default()]
+            Product = null
         };
         return new Product
         {

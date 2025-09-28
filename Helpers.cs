@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using Webshop.Controllers;
 
 namespace Webshop;
 using System.Collections.Generic;

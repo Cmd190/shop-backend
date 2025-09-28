@@ -12,10 +12,6 @@ public interface IRepositoryBase<T>
     void Delete(T entity);
 }
 
-
-
-
-
 public interface IRepositoryWrapper
 {
     IProductRepository Product { get; }

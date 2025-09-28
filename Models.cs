@@ -10,7 +10,7 @@ public class Category
 
     public string Name { get; set; }
 
-    public List<Product> Product { get; set; } = [];
+    public List<Product>? Product { get; set; } = [];
 }
 
 public class ProductOption

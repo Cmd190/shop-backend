@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Webshop.Controllers;
 
 namespace Webshop;
 
@@ -12,6 +11,7 @@ public interface IProductRepository : IRepositoryBase<Product>
 
    Task<Product?> GetProductByIdAsync(int id);
    Task<Product?> GetProductByNameAsync(string name);
+   Task<Product?> GetProductByLinkAsync(string link);
 
 }
 
@@ -29,7 +29,11 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
                 => EF.Functions.Like(p.Name.ToLower(), name.Trim().ToLowerInvariant()))
             .Include(p => p.Category)
             .FirstOrDefaultAsync();
-
+    public async Task<Product?> GetProductByLinkAsync(string link) =>
+        await FindByCondition(p
+                => EF.Functions.Like(p.ProductLink.ToLower(), link.Trim().ToLowerInvariant()))
+            .Include(p => p.Category)
+            .FirstOrDefaultAsync();
     public async Task<PagedList<Product>> GetAllProductsAsync(ProductQueryParams queryParams)
     {
         return await _context.Product
@@ -51,10 +55,9 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
                             queryParams.Category.Trim().ToLowerInvariant()))
                 )
                 // check name
-                // TODO implements startsWith
                 && (string.IsNullOrWhiteSpace(queryParams.ProductName)
                     || EF.Functions.Like(p.Name.ToLower(),
-                            queryParams.ProductName.Trim().ToLowerInvariant())
+                            queryParams.ProductName.Trim().ToLowerInvariant() + "%")
                 )
             )
 
