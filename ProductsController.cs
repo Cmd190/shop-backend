@@ -43,17 +43,11 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     {
         return queryParams.MinPrice >= 0
                      && queryParams.MinPrice < queryParams.MaxPrice
-                     && ValidateManufacturer(queryParams.Manufacturer)
-                     && ValidateCategory(queryParams.Category)
                      && ValidateName(queryParams.ProductName);
     }
 
     private static bool ValidateName(string? name) => name == null || name.Length is > 0 and < 200;
 
-    private static bool ValidateCategory(string? category) => category == null || category.Length is > 4 and < 100;
-
-    private static bool ValidateManufacturer(string? manufacturer)
-        => manufacturer == null || manufacturer.Length is > 4 and < 100;
 
 
     [HttpGet("{categoryName}")]

@@ -22,17 +22,20 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
     public async Task<Product?> GetProductByIdAsync(int id) =>
         await FindByCondition(p => p.Id == id )
         .Include(p => p.Category)
+        .AsNoTracking()
         .FirstOrDefaultAsync() ;
 
     public async Task<Product?> GetProductByNameAsync(string name) =>
         await FindByCondition(p
                 => EF.Functions.Like(p.Name.ToLower(), name.Trim().ToLowerInvariant()))
             .Include(p => p.Category)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
     public async Task<Product?> GetProductByLinkAsync(string link) =>
         await FindByCondition(p
                 => EF.Functions.Like(p.ProductLink.ToLower(), link.Trim().ToLowerInvariant()))
             .Include(p => p.Category)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
     public async Task<PagedList<Product>> GetAllProductsAsync(ProductQueryParams queryParams)
     {
@@ -42,17 +45,15 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
                 p.Price > queryParams.MinPrice
                 && p.Price < queryParams.MaxPrice
                 // check manufacturer
-                && (string.IsNullOrWhiteSpace(queryParams.Manufacturer)
-                    ||  EF.Functions.Like(
-                        p.Manufacturer.ToLower(),
-                        queryParams.Manufacturer.Trim().ToLowerInvariant()
+                && ( queryParams.Manufacturers == null || !queryParams.Manufacturers.Any()
+                    ||  queryParams.Manufacturers.Any(m =>  EF.Functions.Like(m.ToLower(),
+                        p.Manufacturer.ToLower()))
                     )
-                )
+
                 // check category
-                && (string.IsNullOrWhiteSpace(queryParams.Category)
+                && (queryParams.Categories == null || !queryParams.Categories.Any()
                     || p.Category.Any(c
-                        => EF.Functions.Like(c.Name.ToLower(),
-                            queryParams.Category.Trim().ToLowerInvariant()))
+                        => queryParams.Categories.Contains(c.Name.Trim().ToLower()))
                 )
                 // check name
                 && (string.IsNullOrWhiteSpace(queryParams.ProductName)
@@ -62,6 +63,7 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
             )
 
             .OrderBy(p => p.Name)
+            .AsNoTracking()
             .ToPagedListAsync(queryParams.PageNumber, queryParams.PageSize);
     }
 
@@ -71,6 +73,7 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
             .Include(p => p.Category)
             .Where(p => p.Category.Any(c
                 => EF.Functions.Like(c.Name.ToLower(), categoryName.Trim().ToLowerInvariant())))
+            .AsNoTracking()
             .ToListAsync();
     }
 }

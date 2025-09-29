@@ -21,9 +21,9 @@ public class ProductQueryParams
 
     public double MaxPrice { get; set; } = MaxProductPrice;
 
-    public string? Manufacturer { get; set; }
+    public IEnumerable<string>?  Manufacturers { get; set; }
 
-    public string? Category { get; set; }
+    public IEnumerable<string>? Categories { get; set; }
 
     public string? ProductName { get; set; }
 }
