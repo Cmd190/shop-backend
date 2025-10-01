@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Webshop;
+using Webshop.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,11 +77,8 @@ if (!app.Environment.IsDevelopment())
     });
 }
 
-// TODO builder.Services is read only
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
-
-
 
 app.MapControllers();
 app.Run();

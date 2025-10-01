@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using Webshop;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace Webshop;
+namespace Webshop.Models;
 
 
     public class ProductContext : DbContext

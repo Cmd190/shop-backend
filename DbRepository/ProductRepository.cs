@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Webshop.Models;
 
 namespace Webshop;
 
@@ -58,7 +59,7 @@ internal class ProductRepository(ProductContext context) : RepositoryBase<Produc
                 // check name
                 && (string.IsNullOrWhiteSpace(queryParams.ProductName)
                     || EF.Functions.Like(p.Name.ToLower(),
-                            queryParams.ProductName.Trim().ToLowerInvariant() + "%")
+                            "%" + queryParams.ProductName.Trim().ToLowerInvariant() + "%")
                 )
             )
 

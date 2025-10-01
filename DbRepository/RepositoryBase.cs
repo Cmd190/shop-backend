@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Webshop.DbRepository;
+using Webshop.Models;
 
 namespace Webshop;
 

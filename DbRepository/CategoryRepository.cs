@@ -1,4 +1,6 @@
-﻿namespace Webshop;
+﻿using Webshop.Models;
+
+namespace Webshop.DbRepository;
 
 public interface ICategoryRepository : IRepositoryBase<Category>;
 

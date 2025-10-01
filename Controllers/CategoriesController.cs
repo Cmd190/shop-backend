@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Webshop.Models;
 
-namespace Webshop;
+namespace Webshop.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class CategoriesController(ILogger<CategoriesController> logger, ProductContext context) : ControllerBase

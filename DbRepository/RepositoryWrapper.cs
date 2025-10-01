@@ -1,4 +1,7 @@
-﻿namespace Webshop;
+﻿using Webshop.DbRepository;
+using Webshop.Models;
+
+namespace Webshop;
 
 internal class RepositoryWrapper(ProductContext context) : IRepositoryWrapper
 {
