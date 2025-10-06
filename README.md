@@ -1,6 +1,6 @@
 # Welcome to my chocolate webshop!
 
-This is the backend project. The backend can be found [here](https://github.com/Cmd190/shop-backend).
+This is the backend project. The fronted can be found [here](https://github.com/Cmd190/shop-frontend).
 Please note that this is an experimental project which I use to practice my coding skills. It's not perfect and it't not meant to be.
 
 Technologies: C#, NET 9, ASP .Net Core Web API, Entity Framework Core, MySQL DB
