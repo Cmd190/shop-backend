@@ -33,6 +33,7 @@ builder.Services.AddDbContext<ProductContext>(
         .EnableDetailedErrors());
 
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+builder.Services.AddAuthentication().AddJwtBearer();
 
 var app = builder.Build();
 
@@ -79,6 +80,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
