@@ -37,12 +37,23 @@ builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddMicrosoftIdentityWebApi( options =>
+    {
+        builder.Configuration.Bind("AzureAd");
+        options.TokenValidationParameters.RoleClaimType = "groups";
+
+        // for username logging
+        options.TokenValidationParameters.NameClaimType = "name";
+    }, options =>  builder.Configuration.Bind("AzureAd", options));
+
 
 builder.Services.AddAuthorization(opt =>
 {
-    opt.AddPolicy("Read", p => p.RequireScope("Read"));
-    opt.AddPolicy("Write", p => p.RequireScope("Write"));
+    opt.AddPolicy("ReadGroup", policy =>
+        policy.RequireClaim("groups", "8c6d10cb-472e-4714-9f44-27ee188aaedd"));
+
+    opt.AddPolicy("WriteGroup", policy =>
+        policy.RequireClaim("groups", "991a4e8b-5aa5-470e-920d-0e36701a5f5d"));
 });
 
 
