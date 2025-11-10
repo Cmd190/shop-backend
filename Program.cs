@@ -1,6 +1,8 @@
 using System.Net.Mime;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using Webshop;
 using Webshop.Models;
 
@@ -25,15 +27,24 @@ builder.Services.AddCors(options =>
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 43));
 var connection =
     $"{builder.Configuration.GetConnectionString("DefaultConnection")}Pwd={Environment.GetEnvironmentVariable("db_pwd")}";
-builder.Services.AddDbContext<ProductContext>(
-    dbContextOptions => dbContextOptions
-        .UseMySql(connection, serverVersion)
-        .LogTo(Console.WriteLine, LogLevel.Information)
-        .EnableSensitiveDataLogging()
-        .EnableDetailedErrors());
+builder.Services.AddDbContext<ProductContext>(dbContextOptions => dbContextOptions
+    .UseMySql(connection, serverVersion)
+    .LogTo(Console.WriteLine, LogLevel.Information)
+    .EnableSensitiveDataLogging()
+    .EnableDetailedErrors());
 
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
-builder.Services.AddAuthentication().AddJwtBearer();
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
+builder.Services.AddAuthorization(opt =>
+{
+    opt.AddPolicy("Read", p => p.RequireScope("Read"));
+    opt.AddPolicy("Write", p => p.RequireScope("Write"));
+});
+
 
 var app = builder.Build();
 
@@ -42,10 +53,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseDeveloperExceptionPage();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
+    app.UseSwaggerUi(options => { options.DocumentPath = "/openapi/v1.json"; });
 }
 
 
@@ -78,7 +86,6 @@ if (!app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
 app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
