@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Webshop.Models;
 
@@ -18,14 +19,17 @@ public class CategoriesController(ILogger<CategoriesController> logger, ProductC
     }
 
     [HttpPost]
+    [Authorize(Policy = "WriteGroup")]
     public async Task<ActionResult<Category>> PostCategory(Category cat)
     {
+          logger.LogInformation($"Authorized access of method requiring write access {nameof(PostCategory)} by user {User.Identity?.Name ?? "unavailable"} ");
           await context.Categories.AddAsync(cat);
           await context.SaveChangesAsync();
           return CreatedAtAction(cat.Name, new { id = cat.Id }, cat);
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "WriteGroup")]
     public async Task<IActionResult> PutCategory(int id, Category category)
     {
         if (id != category.Id)
@@ -33,6 +37,7 @@ public class CategoriesController(ILogger<CategoriesController> logger, ProductC
             return BadRequest();
         }
 
+        logger.LogInformation($"Authorized access of method requiring write access {nameof(PostCategory)} by user {User.Identity?.Name ?? "unavailable"} ");
         context.Entry(category).State = EntityState.Modified;
 
         try

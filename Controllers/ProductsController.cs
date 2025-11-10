@@ -15,13 +15,15 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     // https://code-maze.com/searching-aspnet-core-webapi/
 
 
-    [Authorize(Policy = "API.Read")]
+    [Authorize(Policy = "ReadGroup")]
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts([FromQuery] ProductQueryParams queryParams)
     {
         LogRequest();
         logger.LogInformation(
             $"Received Request mapped to method {nameof(GetAllProducts)} with parameters {queryParams}");
+
+        logger.LogInformation($"Authorized access of method {nameof(GetAllProducts)} by user {User?.Identity?.Name ?? "unavailable"} ");
         if (!ValidateFilterParams(queryParams))
         {
             return BadRequest("Incorrect Filter Settings");
