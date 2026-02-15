@@ -26,6 +26,18 @@ public class ProductQueryParams
     public IEnumerable<string>? Categories { get; set; }
 
     public string? ProductName { get; set; }
+
+    public override string ToString()
+    {
+        var manufacturersStr = Manufacturers != null ? string.Join(", ", Manufacturers) : "None";
+        var categoriesStr = Categories != null ? string.Join(", ", Categories) : "None";
+
+        return $"Page: {PageNumber}, Size: {PageSize} | " +
+               $"Price: {MinPrice:C} - {MaxPrice:C} | " +
+               $"Product: {ProductName ?? "Any"} | " +
+               $"Manufacturers: [{manufacturersStr}] | " +
+               $"Categories: [{categoriesStr}]";
+    }
 }
 
 public class PagedList<T> : List<T>

@@ -6,16 +6,14 @@ using Webshop.Models;
 namespace Webshop;
 
 [ApiController]
+[Authorize(Policy = "ReadScope")]
+[Authorize(Policy = "HasReadRole")]
 [Route("[controller]")]
 public class ProductsController(ILogger<ProductsController> logger, ProductContext context, IRepositoryWrapper repo)
     : ControllerBase
 {
-    // TODO Result Validation
-    // TODD https://www.entityframeworktutorial.net/efcore/querying-in-ef-core.aspx
-    // https://code-maze.com/searching-aspnet-core-webapi/
 
-
-    [Authorize(Policy = "ReadGroup")]
+    [Authorize(Policy = "HasWriteRole")]
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts([FromQuery] ProductQueryParams queryParams)
     {
@@ -59,6 +57,7 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     [HttpGet("{categoryName}")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts(string categoryName)
     {
+        var claims = User.Claims;
         LogRequest();
         logger.LogInformation(
             $"Received Request: Get Products by category method {nameof(GetAllProducts)} with parameters {nameof(categoryName)} {categoryName}");

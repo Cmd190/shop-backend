@@ -1,8 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Webshop;
 using Webshop.Models;
 
@@ -29,18 +33,19 @@ var connection =
     $"{builder.Configuration.GetConnectionString("DefaultConnection")}Pwd={Environment.GetEnvironmentVariable("db_pwd")}";
 builder.Services.AddDbContext<ProductContext>(dbContextOptions => dbContextOptions
     .UseMySql(connection, serverVersion)
-    .LogTo(Console.WriteLine, LogLevel.Information)
     .EnableSensitiveDataLogging()
     .EnableDetailedErrors());
 
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi( options =>
     {
         builder.Configuration.Bind("AzureAd");
-        options.TokenValidationParameters.RoleClaimType = "groups";
+        options.TokenValidationParameters.RoleClaimType = "roles";
+        options.TokenValidationParameters.ValidAudience = builder.Configuration["AzureAd:Audience"];
 
         // for username logging
         options.TokenValidationParameters.NameClaimType = "name";
@@ -49,19 +54,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(opt =>
 {
-    opt.AddPolicy("ReadGroup", policy =>
-        policy.RequireClaim("groups", "8c6d10cb-472e-4714-9f44-27ee188aaedd"));
+    opt.AddPolicy("ReadScope", policy => policy.RequireScope("Read"));
+    opt.AddPolicy("HasReadRole", policy =>
+        policy.RequireRole(builder.Configuration["AzureAd:ReadRole"]
+                           ?? throw new InvalidConfigurationException("AzureAd:ReadRole not configured")));
 
-    opt.AddPolicy("WriteGroup", policy =>
-        policy.RequireClaim("groups", "991a4e8b-5aa5-470e-920d-0e36701a5f5d"));
+    opt.AddPolicy("HasWriteRole", policy =>
+        policy.RequireRole(builder.Configuration["AzureAd:WriteRole"]
+                           ?? throw new InvalidConfigurationException("AzureAd:WriteRole not configured")));
 });
 
 
 var app = builder.Build();
+app.UseHttpsRedirection();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    // TODO remove
+    IdentityModelEventSource.ShowPII = true;
+    IdentityModelEventSource.LogCompleteSecurityArtifact = true;
     app.MapOpenApi();
     app.UseDeveloperExceptionPage();
     app.UseSwaggerUi(options => { options.DocumentPath = "/openapi/v1.json"; });
@@ -70,6 +82,7 @@ if (app.Environment.IsDevelopment())
 
 if (!app.Environment.IsDevelopment())
 {
+    app.UseHsts();
     app.UseExceptionHandler(exceptionHandlerApp =>
     {
         exceptionHandlerApp.Run(async context =>
