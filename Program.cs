@@ -37,13 +37,11 @@ builder.Services.AddDbContext<ProductContext>(dbContextOptions => dbContextOptio
     .EnableDetailedErrors());
 
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi( options =>
     {
-        builder.Configuration.Bind("AzureAd");
         options.TokenValidationParameters.RoleClaimType = "roles";
         options.TokenValidationParameters.ValidAudience = builder.Configuration["AzureAd:Audience"];
 
@@ -54,7 +52,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(opt =>
 {
-    opt.AddPolicy("ReadScope", policy => policy.RequireScope("Read"));
+    opt.AddPolicy("ReadScope", policy =>
+        policy.RequireScope(builder.Configuration["AzureAd:ReadScope"]
+                            ?? throw new InvalidConfigurationException("AzureAd:ReadScope not configured")));
+
+    opt.AddPolicy("WriteScope", policy =>
+        policy.RequireScope(builder.Configuration["AzureAd:WriteScope"]
+                            ?? throw new InvalidConfigurationException("AzureAd:WriteScope not configured")));
+
     opt.AddPolicy("HasReadRole", policy =>
         policy.RequireRole(builder.Configuration["AzureAd:ReadRole"]
                            ?? throw new InvalidConfigurationException("AzureAd:ReadRole not configured")));
@@ -72,8 +77,8 @@ app.UseHttpsRedirection();
 if (app.Environment.IsDevelopment())
 {
     // TODO remove
-    IdentityModelEventSource.ShowPII = true;
-    IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+    // IdentityModelEventSource.ShowPII = true;
+    // IdentityModelEventSource.LogCompleteSecurityArtifact = true;
     app.MapOpenApi();
     app.UseDeveloperExceptionPage();
     app.UseSwaggerUi(options => { options.DocumentPath = "/openapi/v1.json"; });

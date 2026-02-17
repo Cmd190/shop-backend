@@ -17,6 +17,7 @@ public class CategoriesController(ILogger<CategoriesController> logger, ProductC
 
     [HttpPost]
     [Authorize(Policy = "HasWriteRole")]
+    [Authorize(Policy = "WriteScope")]
     public async Task<ActionResult<Category>> PostCategory(Category cat)
     {
           logger.LogInformation($"Authorized access of method requiring write access {nameof(PostCategory)} by user {User.Identity?.Name ?? "unavailable"} ");
@@ -27,6 +28,7 @@ public class CategoriesController(ILogger<CategoriesController> logger, ProductC
 
     [HttpPut("{id}")]
     [Authorize(Policy = "HasWriteRole")]
+    [Authorize(Policy = "WriteScope")]
     public async Task<IActionResult> PutCategory(int id, Category category)
     {
         if (id != category.Id)

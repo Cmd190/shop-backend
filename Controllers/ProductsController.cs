@@ -9,19 +9,20 @@ namespace Webshop;
 [Authorize(Policy = "ReadScope")]
 [Authorize(Policy = "HasReadRole")]
 [Route("[controller]")]
-public class ProductsController(ILogger<ProductsController> logger, ProductContext context, IRepositoryWrapper repo)
+public class ProductsController(ILogger<ProductsController> logger, IRepositoryWrapper repo)
     : ControllerBase
 {
 
     [Authorize(Policy = "HasWriteRole")]
+    [Authorize(Policy = "WriteScope")]
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts([FromQuery] ProductQueryParams queryParams)
     {
-        LogRequest();
+        LogRequest(nameof(GetAllProducts));
         logger.LogInformation(
             $"Received Request mapped to method {nameof(GetAllProducts)} with parameters {queryParams}");
 
-        logger.LogInformation($"Authorized access of method {nameof(GetAllProducts)} by user {User?.Identity?.Name ?? "unavailable"} ");
+
         if (!ValidateFilterParams(queryParams))
         {
             return BadRequest("Incorrect Filter Settings");
@@ -58,7 +59,7 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts(string categoryName)
     {
         var claims = User.Claims;
-        LogRequest();
+        LogRequest(nameof(GetAllProducts));
         logger.LogInformation(
             $"Received Request: Get Products by category method {nameof(GetAllProducts)} with parameters {nameof(categoryName)} {categoryName}");
 
@@ -66,17 +67,18 @@ public class ProductsController(ILogger<ProductsController> logger, ProductConte
         return Ok(products.Select(p => p.ToProductDto()));
     }
 
-    private void LogRequest()
+    private void LogRequest(string methodName)
     {
         var request = HttpContext.Request;
         var url = $"{request.Scheme}://{request.Host}{request.Path}{request.QueryString}";
         logger.LogInformation($" At {DateTime.Now} Request URL: {url}");
+        logger.LogInformation($"Authorized access of method {methodName} by user {User?.Identity?.Name ?? "unavailable"}");
     }
 
     [HttpGet]
     public async Task<ActionResult<ProductDto>> GetProduct(int? id, string? link, string? name)
     {
-        LogRequest();
+        LogRequest(nameof(GetProduct));
         logger.LogInformation(
             $"Received Request: Get single Product method {nameof(GetProduct)} with parameters {nameof(id)}:{id}, {nameof(link)}:{link}, {nameof(name)}:{name}");
 
